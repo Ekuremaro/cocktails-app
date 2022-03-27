@@ -6,16 +6,44 @@ const AppContext = React.createContext();
 
 const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  return <AppContext.Provider value="hello">{children}</AppContext.Provider>;
+  const [searchTerm, setSearchTerm] = useState("a");
+  const [cocktails, setCocktails] = useState([]);
+  const fetchDrinks = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${url}${searchTerm}`);
+      const drinks = await response.json();
+      console.log(drinks);
+      if (drinks) {
+        const newCocktails = drinks.map((item) => {
+          const { idDrink, strDrink, strDrinkThumb, strAlcoholic, strGlass } =
+            item;
+          return {
+            id: idDrink,
+            name: strDrink,
+            image: strDrinkThumb,
+            info: strAlcoholic,
+            glass: strGlass,
+          };
+        });
+      } else {
+        setCocktails([]);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchDrinks();
+  }, [searchTerm]);
+  return (
+    <AppContext.Provider value={{ loading, cocktails, setSearchTerm }}>
+      {children}
+    </AppContext.Provider>
+  );
 };
-// const fetchData = async () => {
-//   setLoading(true);
-//   const response = await fetch(url);
-//   const data = await response.json();
-//   setLoading(false);
-//   setCocktails(data);
-// };
 
 // useEffect(() => {
 //   fetchData();
